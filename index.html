@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',Aptos,Calibri,sans-serif;background:#f4f6f9;color:#1a2535}
+  .header{background:#1a3a5c;color:#fff;padding:18px 26px 14px}
+  .header h1{font-size:21px;font-weight:500;font-style:italic;margin-bottom:5px}
+  .header p{font-size:10.5px;color:#b8ccde;line-height:1.6;max-width:820px}
+  .legend{display:flex;gap:14px;padding:8px 26px;background:#fff;border-bottom:1px solid #e0e6ed;flex-wrap:wrap;align-items:center}
+  .li{display:flex;align-items:center;gap:5px;font-size:10px;color:#555}
+  .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+  .dg{background:#1a9a4a}.da{background:#f0a500}.db{background:#1a6db5}.dc{background:#888}
+  .board{display:grid;grid-template-columns:2fr 1.6fr 1fr 1fr;gap:1px;background:#dde3ea}
+  .col{background:#f4f6f9;display:flex;flex-direction:column}
+  .col-head{background:#1a3a5c;color:#fff;text-align:center;font-size:11.5px;font-weight:500;padding:7px 4px}
+  .col-body{padding:9px 7px;display:flex;flex-direction:column;gap:7px}
+  .card{background:#fff;border-radius:6px;border:1.5px solid #e0e6ed;cursor:pointer;transition:box-shadow .15s,border-color .15s;overflow:hidden}
+  .card:hover{box-shadow:0 3px 12px rgba(0,0,0,.13);border-color:#aac3db}
+  .cb{padding:6px 8px 8px;font-size:10px;color:#1a2535;line-height:1.55}
+  .card-badge{padding:6px 9px 5px;font-size:10.5px;font-weight:600;text-align:center;line-height:1.3}
+  .bo{background:#f0a500;color:#4a2800}
+  .bg{background:#1a7a4a;color:#fff}
+  .bn{background:#1a3a5c;color:#fff}
+  .bt{background:#1b7a8a;color:#fff}
+  .bh{background:#888;color:#fff}
+  .sr{display:flex;align-items:flex-start;gap:5px;margin-bottom:2px}
+  .pill{display:inline-block;font-size:8.5px;border-radius:3px;padding:1px 5px;margin-bottom:3px;font-weight:500}
+  .pg{background:#e6f4ec;color:#1a6e3a}.pa{background:#fff3e0;color:#7a4800}
+  .pb{background:#e3f0fb;color:#0d47a1}.pc{background:#d0e8f5;color:#0d3a6e}
+  .ph{background:#ebebeb;color:#555}.pr{background:#fdecea;color:#a32d2d}
+  .nt{font-size:9px;color:#1a6db5;font-weight:600;margin-top:2px}
+  .pbar{height:6px;background:#e4e9f0;border-radius:3px;overflow:hidden;margin:4px 0 1px}
+  .pfill{height:100%;background:#1a6db5;border-radius:3px}
+  .plbl{font-size:8.5px;color:#777;text-align:right}
+  .team{font-size:9px;color:#888;margin-bottom:4px}
+  .overlay{display:none;position:fixed;inset:0;background:rgba(15,25,40,.5);z-index:200;align-items:center;justify-content:center;padding:16px}
+  .overlay.open{display:flex}
+  .modal{background:#fff;border-radius:10px;width:580px;max-width:100%;max-height:88vh;overflow-y:auto;box-shadow:0 16px 48px rgba(0,0,0,.25);position:relative;animation:up .2s ease}
+  @keyframes up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+  .mhead{padding:16px 18px 12px;border-bottom:1px solid #e8eef4;position:sticky;top:0;background:#fff;z-index:1;display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+  .mhead h2{font-size:15px;font-weight:600;color:#1a3a5c;margin-bottom:3px}
+  .mhead .sub{font-size:10px;color:#888}
+  .xbtn{background:none;border:none;font-size:22px;cursor:pointer;color:#999;line-height:1;flex-shrink:0;padding:0 2px;margin-top:-2px}
+  .xbtn:hover{color:#333}
+  .mbody{padding:14px 18px 20px}
+  .slbl{font-size:9.5px;font-weight:700;color:#1a3a5c;text-transform:uppercase;letter-spacing:.8px;margin:12px 0 6px;border-left:3px solid #1a3a5c;padding-left:7px}
+  .dl{list-style:none;padding:0}
+  .dl li{font-size:10.5px;color:#333;padding:4px 0 4px 14px;border-bottom:1px solid #f0f3f6;position:relative;line-height:1.5}
+  .dl li::before{content:'•';position:absolute;left:2px;color:#1a6db5}
+  .ibox{background:#f0f5fb;border-left:3px solid #1a6db5;border-radius:0 5px 5px 0;padding:8px 10px;font-size:10.5px;color:#1a3055;margin:6px 0;line-height:1.55}
+  .wbox{background:#fff8e1;border-left:3px solid #f0a500;border-radius:0 5px 5px 0;padding:8px 10px;font-size:10.5px;color:#5a3800;margin:6px 0;line-height:1.55}
+  .gbox{background:#e8f5ee;border-left:3px solid #1a9a4a;border-radius:0 5px 5px 0;padding:8px 10px;font-size:10.5px;color:#0d4a24;margin:6px 0;line-height:1.55}
+  .hbox{background:#f2f2f2;border-left:3px solid #999;border-radius:0 5px 5px 0;padding:8px 10px;font-size:10.5px;color:#444;margin:6px 0;line-height:1.55}
+  .rbox{background:#fdecea;border-left:3px solid #cc3333;border-radius:0 5px 5px 0;padding:8px 10px;font-size:10.5px;color:#6b1515;margin:6px 0;line-height:1.55}
+  .mpbar{height:8px;background:#e4e9f0;border-radius:4px;overflow:hidden;margin:4px 0 2px}
+  .mpfill{height:100%;background:#1a6db5;border-radius:4px}
+  .mplbl{font-size:10px;color:#666;text-align:right;margin-bottom:4px}
+  .ftag{display:flex;gap:6px;flex-wrap:wrap;margin:5px 0}
+  .fnote{font-size:9px;color:#bbb;margin-top:18px;text-align:center;border-top:1px solid #eee;padding-top:8px}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>IT Projects Ongoing — April 23, 2026</h1>
+  <p>The IT Enterprise Applications team aims to establish a single, trusted source of data that ensures seamless integration across systems. Click any card to see full details.</p>
+</div>
+<div class="legend">
+  <span class="li"><span class="dot dg"></span>Win / Complete</span>
+  <span class="li"><span class="dot da"></span>In Progress</span>
+  <span class="li"><span class="dot dc"></span>On Hold / Closed</span>
+  <span class="li"><span class="dot db"></span>Next Milestone</span>
+  <span style="color:#ccc;font-size:11px">|</span>
+  <span style="font-size:10px;color:#999">Click a card to expand details</span>
+</div>
+
+<div class="board">
+  <!-- ADITI 3.0 -->
+  <div class="col">
+    <div class="col-head">Aditi 3.0</div>
+    <div class="col-body">
+
+      <div class="card" onclick="showModal('ukg')">
+        <div class="card-badge bg">UKG & Ruddr Integration</div>
+        <div class="cb">
+          <p class="team">Data Analytics Team</p>
+          <span class="pill pg">In Production</span>
+          <div class="sr"><span class="dot da" style="margin-top:3px"></span><span>Bug fixing ongoing</span></div>
+        </div>
+      </div>
+
+<div class="card" onclick="showModal('talent')">
+        <div class="card-badge bo">Talent Architecture Project</div>
+        <div class="cb">
+          <p class="team">Data Analytics Team · Sponsor: Ina M</p>
+          <span class="pill pg">✅ US & India updated</span>
+          <div class="sr"><span class="dot da" style="margin-top:3px"></span><span>LATAM data pending</span></div>
+          <p class="nt">→ Comparative dashboard in development: Salary Bands vs Salary Ranges</p>
+        </div>
+      </div>
+
+      <div class="card" onclick="showModal('skills_hub')">
+        <div class="card-badge bo">Consultant Skills Hub</div>
+        <div class="cb">
+          <p class="team">Developer: Krishan Kumar · IT Support: Sunil / Rafael</p>
+          <span class="pill pa">🔍 Under IT Review — Pre-Production</span>
+          <div class="sr"><span class="dot da" style="margin-top:3px"></span><span>Architecture review in progress</span></div>
+          <p class="nt">→ IT to own support & security once live</p>
+        </div>
+      </div>
+
+
+
+    </div>
+  </div>
+
+  <!-- CAPACITY -->
+  <div class="col">
+    <div class="col-head">Capacity</div>
+    <div class="col-body">
+
+      <div class="card" onclick="showModal('bench_des')">
+        <div class="card-badge bo">Bench Process DES Automation</div>
+        <div class="cb">
+          <p class="team">Tech Support Team — Priority 1</p>
+          <span class="pill pa">🚀 Phase 2 — In Progress</span>
+          <div class="sr"><span class="dot da" style="margin-top:3px"></span><span>Phase 2 enhancements under development</span></div>
+          <p class="nt">→ Expected go-live: first week of May</p>
+        </div>
+      </div>
+
+
+      <div class="card" onclick="showModal('ruddr_needs')">
+        <div class="card-badge bn">Ruddr Needs</div>
+        <div class="cb">
+          <p class="team">Vendor: Ruddr · Finance · Delivery · IT</p>
+          <span class="pill pg">✅ Time Tracking Restriction — Delivered!</span>
+          <div class="sr"><span class="dot da" style="margin-top:3px"></span><span>Roadmap ETAs updated — Apr 17 review</span></div>
+          <p class="nt">→ 4 items remaining on vendor roadmap</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- DELIVERY -->
+  <div class="col">
+    <div class="col-head">Delivery</div>
+    <div class="col-body">
+
+      <div class="card" onclick="showModal('pa_forecast')">
+        <div class="card-badge bo">Portfolio Analytics Dashboard<br><span style="font-size:9px;font-weight:400">Forecast vs Actuals · Commitment Snapshots</span></div>
+        <div class="cb">
+          <p class="team">Stakeholder: Ina · Requester: Sebastian / Pilar</p>
+          <span class="pill pa">⏳ Awaiting Delivery Team Feedback</span>
+          <div class="sr"><span class="dot da" style="margin-top:3px"></span><span>Review session scheduled — this Friday (Apr 25)</span></div>
+          <p class="nt">→ Missing quotas pending Sebas</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- PROCESS AUTOMATION -->
+  <div class="col">
+    <div class="col-head">Process Automation</div>
+    <div class="col-body">
+
+      <div class="card" onclick="showModal('jrf')">
+        <div class="card-badge bh">Job Requisition Form Automation</div>
+        <div class="cb">
+          <p class="team">Stakeholder: Ina · IT: John / Florencia</p>
+          <span class="pill ph">On Hold</span>
+          <div class="sr"><span class="dot dc" style="margin-top:3px"></span><span>On hold per Natalia Blanco (Business Operations)</span></div>
+          <p class="nt">→ Awaiting process maturation</p>
+        </div>
+      </div>
+
+      <div class="card" onclick="showModal('ruddr_audit')">
+        <div class="card-badge bt">Ruddr Unallocated Consultants</div>
+        <div class="cb">
+          <p class="team">Owner: Alejo M · Requester: Pilar B</p>
+          <span class="pill pg">MVP built by Ina — IT development cancelled</span>
+          <div class="sr"><span class="dot da" style="margin-top:3px"></span><span>IT focus: support MVP go-to-production</span></div>
+          <p class="nt">→ Next steps: align production readiness</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="overlay" id="overlay">
+  <div class="modal" id="modal">
+    <div class="mhead">
+      <div><h2 id="m-title"></h2><div class="sub" id="m-sub"></div></div>
+      <button class="xbtn" id="xbtn">×</button>
+    </div>
+    <div class="mbody" id="m-body"></div>
+  </div>
+</div>
+
+<script>
+const projects = {
+  ukg:{
+    title:"UKG & Ruddr Integration",
+    sub:"Data Analytics Team",
+    body:`
+      <div class="slbl">Objective</div>
+      <div class="ibox">Establish UKG as the single source of truth for employee data by automating member creation, updates, and deletions into Ruddr — eliminating manual processes and ensuring data consistency across HR and project management systems.</div>
+      <div class="gbox">🟢 <strong>In Production</strong> — Integration is live and running.</div>
+      <div class="wbox">🔧 <strong>Bug fixing ongoing</strong> — An issue was detected in the integration flow and is currently being resolved by the team.</div>
+      <div class="slbl">Next Steps</div>
+      <div class="ibox">📌 Resolve identified issue and confirm stable operation in production.</div>`
+  },
+  talent:{
+    title:"Talent Architecture Project",
+    sub:"Data Analytics Team · Executive Sponsor: Ina M",
+    body:`
+      <div class="slbl">Objective</div>
+      <div class="ibox">Define and implement a scalable talent architecture by standardizing job titles, seniority levels, and salary bands globally — enabling consistent workforce planning, fair compensation, and clear career paths across all shores.</div>
+      <div class="ftag">
+        <span class="pill pg">✅ US & India Salary Bands Updated</span>
+        <span class="pill pa">🔄 LATAM pending</span>
+      </div>
+      <div class="wbox">⚠ <strong>Challenge:</strong> Difficulty encountered updating data directly in UKG due to an administrator change in the platform. Data is being updated directly in the database as a workaround to ensure changes are reflected in the dashboard.</div>
+      <div class="slbl">Wins</div>
+      <ul class="dl">
+        <li><strong>28 Nov 2025:</strong> Role standardization completed for DES consultants.</li>
+        <li><strong>27 Jan 2026:</strong> Talent Architecture Dashboard (Salary Range) published.</li>
+        <li><strong>19 Mar 2026:</strong> Data received from Heads of Practices — 593-record update ready.</li>
+        <li><strong>30 Mar 2026:</strong> US & India roles and levels successfully loaded.</li>
+        <li><strong>Apr 2026:</strong> ✅ US and India Salary Bands now updated directly in the database — visible in the dashboard.</li>
+      </ul>
+      <div class="slbl">Current Status</div>
+      <ul class="dl">
+        <li><strong>US:</strong> Roles, seniority levels, and Salary Bands updated. ✅</li>
+        <li><strong>India:</strong> Roles, seniority levels, and Salary Bands updated. ✅</li>
+        <li><strong>LATAM:</strong> Pending — Salary Band information under review. Meeting scheduled for today.</li>
+      </ul>
+      <div class="slbl">Next Steps</div>
+      <div class="ibox">📌 <strong>Comparative Dashboard in development:</strong> Building a side-by-side view of Salary Range (Current Employee Salary Data) vs Salary Band (Benchmarking Information) — to provide visibility into internal compensation vs market benchmarks.</div>
+      <ul class="dl">
+        <li>Employee communication strategy: decision pending with Ina.</li>
+        <li>Recruiter training: scope and format to be defined with John & Cristina.</li>
+        <li>US salary bands: re-validation with Abood still in progress.</li>
+      </ul>`
+  },
+  overhead:{
+    title:"New Overhead Calculation 2026",
+    sub:"Data Analytics Team · Stakeholder: Ina M · Requester: Sebastian P",
+    body:`
+      <div class="slbl">Objective</div>
+      <div class="ibox">Automate extraction of overhead cost per consultant per country based on billable hours, to improve financial accuracy and portfolio profitability analysis.</div>
+      <div class="wbox">🟡 <strong>Ongoing</strong> — 1st Draft released: 28 Jan 2026.</div>
+      <div class="slbl">Details</div>
+      <ul class="dl">
+        <li>First draft completed — average consultant overhead by country calculated and shared.</li>
+        <li>Finance team reviewing methodology — sign-off pending.</li>
+      </ul>
+      <div class="slbl">Next Step</div>
+      <div class="ibox">📌 Completing billable hours per country to support Finance in the validation of the information.</div>`
+  },
+  bench_des:{
+    title:"Bench Process DES Automation",
+    sub:"Tech Support Team — Priority 1",
+    body:`
+      <div class="slbl">Objective</div>
+      <div class="ibox">Automate the DES bench management process to reduce manual effort, accelerate consultant redeployment, and provide real-time visibility into available talent for delivery teams.</div>
+      <div class="gbox">✔ <strong>Phase 1 — CLOSED.</strong> Win: 02 March 2026. Bench process fully automated and stable in production.</div>
+      <div class="wbox">🚀 <strong>Phase 2 — In Progress.</strong> Two new enhancements currently in development. Expected go-live: <strong>first week of May 2026.</strong></div>
+      <div class="slbl">Phase 2 — Features in Development</div>
+      <ul class="dl">
+        <li><strong>Head of Practice Approval for Terminations:</strong> Adding an approval gate requiring Head of Practice sign-off when a termination is processed in the Lighthouse app.</li>
+        <li><strong>Reassignment Flow:</strong> Incorporating the consultant reassignment workflow into the automation — ensuring reallocation steps are handled within the same automated process.</li>
+      </ul>`
+  },
+  ruddr_needs:{
+    title:"Ruddr Needs",
+    sub:"Vendor: Ruddr (Jason Barrett, CS) · Finance · Delivery · IT",
+    body:`
+      <div class="slbl">Objective</div>
+      <div class="ibox">Strengthen Ruddr as Aditi's reliable system of record by systematically closing platform gaps in financial controls, time-entry governance, access management, and reporting — through a structured monthly engagement with the vendor.</div>
+      <div class="gbox">🟢 <strong>Win — 7 Apr 2026:</strong> Ruddr shared official roadmap updates on 4 of the 5 pending items (email from Chris Bush). The 5th item was confirmed by IT the same day.</div>
+      <div class="gbox">🏆 <strong>New Win — Apr 17, 2026: Time Tracking Restriction by Allocation — DELIVERED.</strong> Ruddr released a new setting that prevents consultants from logging time on days they are not allocated. Pending: confirm list of active projects to enable this setting (Owner: Martin, Florencia & Pilar). Also confirming whether restriction should apply to internal Aditi projects by default.</div>
+      <div class="slbl">Updated Vendor Roadmap (Apr 17, 2026)</div>
+      <ul class="dl">
+        <li><strong>1. Time tracking limited to allocation days:</strong> ✅ <strong>DELIVERED.</strong> Setting now available — projects to be enabled by team.</li>
+        <li><strong>2. Role-based field editing (financial info per project):</strong> Breaking out Edit Project permissions in Security Role model. Updated ETA: <strong>Late June / Early July 2026</strong>.</li>
+        <li><strong>3. Revenue Adjustment Ledger (Accounting tab):</strong> Allows earned revenue to be adjusted up/down. Updated ETA: <strong>End of May 2026</strong> (moved up from August).</li>
+        <li><strong>4. Lock down past financial periods (months):</strong> Expected go-live: <strong>End of Q3 / Early Q4 2026</strong>.</li>
+        <li><strong>5. Credit Memos:</strong> Confirmed for <strong>Q3 2026</strong>. Revenue in Ruddr is overstated by CM amount — fix will align reporting with Acumatica.</li>
+      </ul>
+      <div class="ibox">📋 <strong>Item 5 Detail — Credit Memos:</strong><br>
+        • Credit Memos must reduce revenue in system-generated reports (currently overstated by the CM amount).<br>
+        • Funds must be placed back onto Purchase Order balances for accurate tracking without manual validation in client portals.<br>
+        • CMs must be visible on the project's Invoice tab, giving Delivery Managers visibility into their budget impact.<br>
+        • CMs must remain tied to the project and client without requiring a link to a specific invoice.
+      </div>
+      <div class="slbl">Additional Items Discussed (Apr 17)</div>
+      <ul class="dl">
+        <li><strong>Revenue Variance Reporting:</strong> Need raised by Stephanie to track deltas between contracted, planned, and invoiced revenue. Jason pointed to the Hourly Revenue by Client and Project report as an immediate resource. A future Hourly Revenue Variance Report is being explored.</li>
+        <li><strong>Variable Monthly Budgets:</strong> Raised by Martin — SOW-tied monthly budgets that fluctuate over time. On the Ruddr roadmap but no confirmed timeline yet.</li>
+        <li><strong>Ruddr AI Assistant:</strong> Budget querying capabilities coming soon. Recent additions: project assignment visibility, role assignments, and bill rate data.</li>
+      </ul>
+      <div class="slbl">Previous Wins</div>
+      <ul class="dl">
+        <li>Security Roles redesigned — PM/DM unified, delivery permissions restricted.</li>
+        <li>BHC Policy approved by Ina (26 Mar) — Ruddr as sole system of record for DES BHC.</li>
+        <li>Allocation Governance confirmed — DMs/PMs/DDs restricted to their own projects.</li>
+      </ul>`
+  },
+  pa_forecast:{
+    title:"Portfolio Analytics Dashboard",
+    sub:"Data Analytics Team · Stakeholder: Ina M · Requester: Sebastian P / Pilar B",
+    body:`
+      <div class="slbl">Objective</div>
+      <div class="ibox">Provide portfolio leaders with real-time visibility into forecast vs actuals and week-over-week commitment evolution — covering both the Enhancement & Forecast vs Actuals view and the Commitment Snapshots feature.</div>
+      <div class="gbox">✔ <strong>Dashboard delivered and live in Production.</strong> Feedback received from Pilar.</div>
+      <div class="wbox">⏳ <strong>Awaiting Delivery Team Feedback</strong> — Session scheduled for <strong>Friday, April 25</strong> to review the dashboard with the Delivery team.</div>
+      <div class="wbox">⏳ <strong>Missing quotas:</strong> Awaiting quota data from Sebas Pastorino — quotas are being reconsidered and re-evaluated at the business level.</div>
+      <div class="slbl">Delivered Items</div>
+      <ul class="dl">
+        <li>Actuals (recognized) vs Planned (forecasted) labels aligned across all views.</li>
+        <li>Metric selector added — Revenue / Cost / Gross Margin dynamically updates table.</li>
+        <li>Project Status filter added — Not Started / In Progress / Tentative / Completed.</li>
+        <li>Quota number confirmed as pulled directly from Ruddr.</li>
+        <li>Commitment Snapshots feature scoped, developed, and delivered.</li>
+      </ul>
+      <div class="slbl">Next Steps</div>
+      <div class="ibox">📌 Review session with Delivery team scheduled for Friday Apr 25. Formal sign-off from Ina, Sebas, and Pilar pending once feedback is incorporated. Missing quotas to be provided by Sebas.</div>`
+  },
+  pa_commit:{
+    title:"Portfolio Analytics Dashboard",
+    sub:"",
+    body:``
+  },
+  jrf:{
+    title:"Job Requisition Form Automation",
+    sub:"Stakeholder: Ina M · IT Owners: John / Florencia · Business Operations: Natalia Blanco",
+    body:`
+      <div class="slbl">Objective</div>
+      <div class="ibox">Automate the Job Requisition Form process to reduce manual effort and ensure alignment across Capacity, Recruiting, and Operations teams — evaluating Salesforce as the source of truth per Ina's proposal.</div>
+      <div class="hbox">⏸ <strong>On Hold — Final Decision.</strong> Project placed on hold while the <strong>Staffing Plan process matures</strong>. This initiative will be revisited once the Staffing Plan automation has sufficient stability to serve as the foundation for the JRF workflow.</div>
+      <div class="slbl">Context</div>
+      <ul class="dl">
+        <li>Ina's proposal on the table: make <strong>Salesforce the Source of Truth</strong> for the JRF — driving auto-population of key fields (practice, level, title, description).</li>
+        <li>Key edge case identified: JRFs sometimes need to be created before an opportunity is closed/won in Salesforce.</li>
+        <li>Federico proposed an exception field workaround for this scenario.</li>
+        <li>Kickoff meeting held <strong>7 Apr 2026</strong> with John, Florencia, Pilar, Joan, Nela, Arturo, Alvaro, and Fede.</li>
+      </ul>
+      <div class="slbl">Next Steps</div>
+      <ul class="dl">
+        <li>Project remains on hold pending Staffing Plan process maturation.</li>
+        <li>Coordination led by John Rejish & Florencia Carballeira (IT Owners).</li>
+      </ul>`
+  },
+  ruddr_audit:{
+    title:"Ruddr Unallocated Consultants",
+    sub:"Owner: Alejo Morral · Support: Pilar B · Data: Joan Peña · IT: Rafael O",
+    body:`
+      <div class="slbl">Objective</div>
+      <div class="ibox">Identify unallocated consultants in Ruddr on a daily basis, providing real-time visibility to Delivery and Capacity teams to accelerate redeployment decisions. Core business rule: <strong>no active billable member should remain without an allocation.</strong></div>
+      <div class="gbox">🏆 <strong>Direction Change — Apr 16, 2026.</strong> Ina Mainetti developed a functional MVP for this requirement with the support of Claude. In consequence, the IT development has been <strong>cancelled</strong>.</div>
+      <div class="wbox">🔄 <strong>New IT Focus:</strong> IT will accompany the process of taking this MVP to production, ensuring it meets the technical, security, and scalability standards required for our environment. Previous work (scenario analysis, report classification, business logic) remains a key input for the production readiness stage.</div>
+      <div class="wbox">⚡ <strong>Urgency confirmed by Pilar Bontomasi (Apr 22):</strong> Team is asking for clarity on next steps and timeline to go live.</div>
+      <div class="slbl">Problem — 4 Identified Scenarios</div>
+      <ul class="dl">
+        <li><strong>1. Unassigned new hires:</strong> Recently onboarded consultants with no allocation from day one.</li>
+        <li><strong>2. Late offboarding:</strong> Inactive members still showing an active allocation.</li>
+        <li><strong>3. Project end without next assignment:</strong> Consultants whose project ended with no follow-on allocation.</li>
+        <li><strong>4. Retained profiles (Bench):</strong> Bench consultants not yet assigned to the corresponding non-billable project.</li>
+      </ul>
+      <div class="slbl">Next Steps</div>
+      <ul class="dl">
+        <li>Align team on production readiness plan for Ina's MVP — technical review, security, and scalability assessment.</li>
+        <li>Coordinate with Pilar and Alejo on timeline to go live.</li>
+      </ul>
+      <div class="slbl">Previous Context</div>
+      <ul class="dl">
+        <li>BHC Policy approved by Ina (26 Mar) — Ruddr confirmed as sole system of record for DES BHC.</li>
+        <li>MockUp presented by Joan — prototype based on the daily Ruddr report and formulas provided by Martín.</li>
+        <li>Alignment completed 7 Apr 2026 — Kickoff with Pilar, Alejo, and Joan. 4 scenarios defined.</li>
+      </ul>`
+  },
+  skills_hub:{
+    title:"Consultant Skills Hub",
+    sub:"Developer: Krishan Kumar · IT Support: Sunil Nandakumar · Reviewer: Rafael O / Fede G",
+    body:`
+      <div class="slbl">Objective</div>
+      <div class="ibox">Provide a centralized, searchable view of all Aditi employee skills and profiles by integrating the <strong>Prism database</strong> (employee IDs, names, practice info) with the <strong>JobDiva API</strong> (resume retrieval) — enabling filtering by skill set, practice, experience, and education across all employees.</div>
+      <div class="wbox">🔍 <strong>Under IT Review — Pre-Production.</strong> Application is functional and running on an Aditi Virtual Machine (accessible via Cloudflare VPN). IT is conducting a technical and security review before taking on support and production accountability.</div>
+      <div class="slbl">Current Features</div>
+      <ul class="dl">
+        <li><strong>Employee Profile Search:</strong> Filter employees by skill set, practice, experience, and education level across the full Aditi headcount.</li>
+        <li><strong>Skill & Practice Rankings:</strong> Visual charts — vertical bar, horizontal bar, and donut — showing skill and practice distribution.</li>
+        <li><strong>Job Description Integration:</strong> Job descriptions fetched directly from JobDiva for open roles.</li>
+        <li><strong>AI-Powered Interviewer Recommendations:</strong> For each open role, the tool uses AI to suggest the best-fit interviewers from the employee pool.</li>
+        <li><strong>Internal Candidate Matching:</strong> AI identifies internal candidates who match open job requirements.</li>
+      </ul>
+      <div class="slbl">Upcoming Features (Roadmap)</div>
+      <ul class="dl">
+        <li><strong>Job Demand Prediction:</strong> Quarterly forecast (Q1–Q4) based on historical hiring data.</li>
+        <li><strong>Automated Resume Screening & Ranking:</strong> Reduce recruiter workload by automatically screening and ranking applicants.</li>
+      </ul>
+      <div class="slbl">Technology Stack</div>
+      <ul class="dl">
+        <li><strong>AI Layer:</strong> Python · LangGraph · LangChain (agentic AI) · LLM (Large Language Model)</li>
+        <li><strong>Database:</strong> MySQL · Prism (employee source)</li>
+        <li><strong>API:</strong> Flask (microservices) · JobDiva API (resumes & job descriptions)</li>
+        <li><strong>Hosting:</strong> Aditi Virtual Machine · Cloudflare VPN required for access</li>
+      </ul>
+      <div class="ibox">🔗 <strong>Demo (internal VPN only):</strong> http://10.2.5.11:4200/</div>
+      <div class="slbl">IT Accountability</div>
+      <div class="wbox">⚠ Once the solution goes to production, the <strong>IT team will be responsible for support and security</strong>. Architecture diagram requested to ensure full technical visibility before go-live commitment.</div>
+      <div class="slbl">Next Steps</div>
+      <ul class="dl">
+        <li><strong>Architecture Diagram:</strong> Krishan to export Visio diagram to PDF and share with IT team. <strong>Owner: Krishan Kumar</strong> — Deadline: Apr 17 (pending).</li>
+        <li><strong>Architecture Review:</strong> IT team to review diagram and raise technical questions. <strong>Owner: Sunil Nandakumar</strong> — Upon receipt.</li>
+        <li><strong>Feature Updates:</strong> Krishan continues pushing improvements; IT team to be kept informed. <strong>Owner: Krishan Kumar</strong> — Ongoing.</li>
+      </ul>`
+  }
+};
+
+function showModal(id){
+  var p=projects[id];
+  if(!p)return;
+  document.getElementById('m-title').textContent=p.title;
+  document.getElementById('m-sub').textContent=p.sub;
+  document.getElementById('m-body').innerHTML=p.body+'<div class="fnote">© 2025 Aditi Consulting · Confidential and proprietary · April 23, 2026</div>';
+  document.getElementById('overlay').classList.add('open');
+}
+function closeModal(){document.getElementById('overlay').classList.remove('open')}
+document.getElementById('xbtn').addEventListener('click',closeModal);
+document.getElementById('overlay').addEventListener('click',function(e){if(e.target===this)closeModal()});
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeModal()});
+</script>
+</body>
+</html>
