@@ -5,13 +5,10 @@
       "allowedRoles": ["authenticated"]
     }
   ],
-  "auth": {
-    "identityProviders": {
-      "azureActiveDirectory": {
-        "registration": {
-          "openIdIssuer": "https://login.microsoftonline.com/TU-TENANT-ID"
-        }
-      }
+  "responseOverrides": {
+    "401": {
+      "redirect": "/.auth/login/aad",
+      "statusCode": 302
     }
   }
 }
