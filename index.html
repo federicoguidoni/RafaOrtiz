@@ -64,7 +64,7 @@
 </head>
 <body>
 <div class="header">
-  <h1>IT Projects Ongoing — April 23, 2026</h1>
+  <h1>IT Projects Ongoing — April 24, 2026</h1>
   <p>The IT Enterprise Applications team aims to establish a single, trusted source of data that ensures seamless integration across systems. Click any card to see full details.</p>
 </div>
 <div class="legend">
@@ -91,13 +91,17 @@
         </div>
       </div>
 
-<div class="card" onclick="showModal('talent')">
+      <div class="card" onclick="showModal('talent')">
         <div class="card-badge bo">Talent Architecture Project</div>
         <div class="cb">
           <p class="team">Data Analytics Team · Sponsor: Ina M</p>
-          <span class="pill pg">✅ US & India updated</span>
-          <div class="sr"><span class="dot da" style="margin-top:3px"></span><span>LATAM data pending</span></div>
-          <p class="nt">→ Comparative dashboard in development: Salary Bands vs Salary Ranges</p>
+          <div class="ftag" style="margin-bottom:6px">
+            <span class="pill pg">✅ US & India updated</span>
+            <span class="pill pa">🔄 LATAM pending</span>
+          </div>
+          <div style="margin-top:6px;background:#fff8e1;border-left:3px solid #f59e0b;border-radius:5px;padding:7px 10px;font-size:11.5px;color:#92400e;font-weight:600;line-height:1.4">
+            🆕 In Development — Salary Bands vs Salary Ranges Comparative Dashboard
+          </div>
         </div>
       </div>
 
@@ -430,7 +434,7 @@ function showModal(id){
   if(!p)return;
   document.getElementById('m-title').textContent=p.title;
   document.getElementById('m-sub').textContent=p.sub;
-  document.getElementById('m-body').innerHTML=p.body+'<div class="fnote">© 2025 Aditi Consulting · Confidential and proprietary · April 23, 2026</div>';
+  document.getElementById('m-body').innerHTML=p.body+'<div class="fnote">© 2025 Aditi Consulting · Confidential and proprietary · April 24, 2026</div>';
   document.getElementById('overlay').classList.add('open');
 }
 function closeModal(){document.getElementById('overlay').classList.remove('open')}
